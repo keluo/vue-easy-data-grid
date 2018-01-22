@@ -3,7 +3,7 @@ const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const banner =
-  'vue.switch.js\n' +
+  'vue.dataGrid.js\n' +
   '(c) 2017-' + new Date().getFullYear() + ' yuw\n' +
   'Released under the MIT License.'
 module.exports = {
@@ -52,8 +52,9 @@ module.exports = {
 if (process.env.NODE_ENV === 'production') {
   module.exports.devtool = false
   module.exports.entry = {
-    'vue.switch': './src/index.js'
+    'vue.dataGrid': './src/index.js'
   }
+  module.exports.module.rules[0].options.extractCSS = true
   module.exports.output = {
     path: path.resolve(__dirname, './dist'),
     filename: '[name].js',
