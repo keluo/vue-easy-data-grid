@@ -63,7 +63,7 @@
           <span v-if="typeof value != 'object'" v-text="data[key]"></span>
         </td>
         <td v-if="hasOperation" class="options">
-          <slot :data="data"></slot>
+          <slot :data="data" :index="index"></slot>
         </td>
       </tr>
     </tbody>

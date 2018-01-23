@@ -80,6 +80,33 @@
       <a href="javascript:void(0);" @click="showloading">加载数据</a>
     </div>
   </div>
+  <div class="block"  style="width: 80%;">
+    <span class="demonstration">显示加载中</span>
+    <code>
+      
+    </code>
+    <vue-data-grid 
+      :list-data="moveData"
+      :columns="columns"
+      :zebra="true"
+      :is-key-value="true"
+      :has-operation="true"
+      style="float:left;width: 45%;">
+      <template slot-scope="props">
+        <a href="javascript:void(0);" @click="moveToData(props.data)">左移</a>
+      </template>
+    </vue-data-grid>
+    <vue-data-grid 
+      :list-data="moveNewData"
+      :columns="columns"
+      :zebra="true"
+      :is-key-value="true"
+      :has-operation="true"  style="float:right;width: 45%;">
+      <template slot-scope="props">
+        <a href="javascript:void(0);" @click="deleteToData(props.data,props.index)">移除</a>
+      </template>
+    </vue-data-grid>
+  </div>
 </div>
 </template>
 
@@ -88,6 +115,20 @@ export default {
   name: 'App',
   data () {
     return {
+      moveData:[{
+        id:1,
+        name:'张三',
+        age:'18'
+      },{
+        id:2,
+        name:'李四',
+        age:'20'
+      },{
+        id:3,
+        name:'王五',
+        age:'20'
+      }],
+      moveNewData:[],
       listData:[{
         id:1,
         name:'张三',
@@ -143,7 +184,14 @@ export default {
       setTimeout(()=>{
         that.isLoading = false;
       },5000);
-      }
+      },
+    moveToData(data){
+      this.moveNewData.push(data);
+    },
+    deleteToData(data,index){
+      this.moveNewData.splice(index,1);
+
+    }
   }
 }
 </script>
