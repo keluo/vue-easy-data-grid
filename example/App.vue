@@ -9,8 +9,7 @@
       :list-data="listData"
       :columns="columns"
       :zebra="true"
-      :is-key-value="true"
-      :has-operation="false">
+      :is-key-value="true">
     </vue-data-grid>
   </div>
 
@@ -31,18 +30,12 @@
   </div>
 
   <div class="block"  style="width: 80%;">
-    <span class="demonstration">自定义列和操作</span>
+    <span class="demonstration">自定义列</span>
     <vue-data-grid 
       :list-data="listData"
       :columns="columnsForEdit"
       :zebra="true"
-      :is-key-value="true"
-      :has-operation="true">
-      <template slot-scope="props">
-        <a href="" v-text="'编辑'"></a>
-        &nbsp;
-        <a href="javascript:void(0);" @click="deleteData(props.data['name'])">删除</a>
-      </template>
+      :is-key-value="true">
     </vue-data-grid>
   </div>
   <div class="block"  style="width: 80%;">
@@ -79,6 +72,19 @@
     <div class="">
       <a href="javascript:void(0);" @click="showloading">加载数据</a>
     </div>
+  </div>
+  <div class="block"  style="width: 80%;">
+    <span class="demonstration">排序</span>
+    <code>
+      
+    </code>
+    <vue-data-grid 
+      :list-data="listData"
+      :columns="columnsForSort"
+      :zebra="true"
+      :is-key-value="true"
+      >
+    </vue-data-grid>
   </div>
   <div class="block"  style="width: 80%;">
     <span class="demonstration">显示加载中</span>
@@ -152,11 +158,24 @@ export default {
         name:'姓名',
         age:{
           name:'年龄',
-          callback(data){
+          formatter(data){
             return '<a href="javascript:void(0);">' + data['age']+'岁</a>';
           },
           click(data){
             alert(data['age']);
+          }
+        }
+      },
+      columnsForSort:{
+        id:'学号',
+        name:'姓名',
+        age:{
+          name:'年龄',
+          sort:{
+            type:'down',
+            // custom:function(type,key){
+            //   console.log(key,type);
+            // }
           }
         }
       },
@@ -176,7 +195,7 @@ export default {
       alert('删除'+value+'!');
     },
     onSelectionChange(value){
-      alert(value);
+      console.log(value);
     },
     showloading(){
       this.isLoading = true;

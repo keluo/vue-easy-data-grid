@@ -21,7 +21,15 @@
         </th>
         <th v-for="(item,key) in columns" >
           <span v-text="typeof item == 'object' ? item.name : item"></span>
-          <i v-if="typeof item == 'object' && item.filter" class="fa fa-filter" @click="showFilter(key)" :class="(columns[key].filterValue && columns[key].filterValue.length > 0) ? 'current' : ''"></i>
+          <div class="sort-wrap" v-if="typeof item == 'object' && item.sort">
+            <span class="sort-up" :class="item.sort.type === 'up'?'on':''" @click="sort('up',key)">
+              <i class="icon-sort-up"></i>
+            </span>
+            <span class="sort-down" :class="item.sort.type === 'down'?'on':''" @click="sort('down',key)">
+              <i class="icon-sort-down"></i>
+            </span>
+          </div>
+          <!-- <i v-if="typeof item == 'object' && item.filter" class="fa fa-filter" @click="showFilter(key)" :class="(columns[key].filterValue && columns[key].filterValue.length > 0) ? 'current' : ''"></i>
           <div class="filter-wrap" v-if="typeof item == 'object' && item.filter && item.filter.length > 0"  v-show="filter[key]">
             <div class="filter-content">
               <div class="filter-item" v-for="(value,index)  in item.filter">
@@ -32,10 +40,10 @@
             </div>
             <div class="filter-options">
               <a class="confirm" @click="filterSubmit(key)">确定</a>
-              <!--<a class="reset">Reset</a>-->
+              <a class="reset">Reset</a>
             </div>
           </div>
-          <slot name="filter" :data="item" :showFlg="filter" ></slot>
+          <slot name="filter" :data="item" :showFlg="filter" ></slot> -->
         </th>
         <th v-if="hasOperation">操作</th>
       </tr>
@@ -59,7 +67,7 @@
           </label>
         </td>
         <td v-for="(value,key) in columns">
-          <span v-if="typeof value == 'object'" v-html="callback(value,listData[index],key)" v-on:click="click(value,listData[index],key)"></span>
+          <span v-if="typeof value == 'object'" v-html="formatter(value,listData[index],key)" v-on:click="click(value,listData[index],key)"></span>
           <span v-if="typeof value != 'object'" v-text="data[key]"></span>
         </td>
         <td v-if="hasOperation" class="options">
@@ -132,11 +140,21 @@ export default {
   },
   data () {
     return {
-      filter:{},
+      // filter:{},
       selectionVal:[]
     };
   },
   mounted () {
+    if(this.columns){
+      for(const key in this.columns){
+        if(this.columns.hasOwnProperty(key)){
+          let item = this.columns[key];
+          if(item.sort && typeof item.sort.type !== 'undefined'){
+            this.sort(item.sort.type,key);
+          }
+        }
+      }
+    }
   },
   computed: {
     selectionAllVal :{
@@ -167,6 +185,40 @@ export default {
     }
   },
   methods: {
+    sort(type,key){
+      if(typeof this.columns[key].sort.type === 'undefined'){
+        this.$set(this.columns[key].sort, 'type', '');
+      }
+      if(type === 'up'){
+        this.columns[key].sort.type = 'up';
+      }else if(type === 'down'){
+        this.columns[key].sort.type = 'down';
+      }
+      if(this.columns[key].sort.custom&& typeof this.columns[key].sort.custom == 'function'){
+        this.columns[key].sort.custom(type,key);
+      }else{
+        let x = this.listData.sort(this.sortBy(key,type === 'up'?true:false));
+      }
+    },
+    sortBy: function(attr,rev){
+        //第二个参数没有传递 默认升序排列
+        if(rev ==  undefined){
+            rev = 1;
+        }else{
+            rev = (rev) ? 1 : -1;
+        }
+        return function(a,b){
+            a = a[attr];
+            b = b[attr];
+            if(a < b){
+                return rev * -1;
+            }
+            if(a > b){
+                return rev * 1;
+            }
+            return 0;
+        }
+    },
     clearSelection(){
       this.selectionVal = [];
     },
@@ -180,9 +232,9 @@ export default {
         }
       }
     },
-    callback(value,data,key){
-      if(value.callback){
-        return value.callback(data);
+    formatter(value,data,key){
+      if(value.formatter && typeof value.formatter === 'function'){
+        return value.formatter(data);
       }else{
         return data[key];
       }
@@ -194,21 +246,21 @@ export default {
         return data[key];
       }
     },
-    sortBy(key) {
-      this.sortKey = key
-      this.sortOrders[key] = this.sortOrders[key] * -1
-    },
-    showFilter(key){
-      if(this.filter[key]){
-        this.filter[key] = 0;
-      }else{
-        Vue.set(this.filter,key,1);
-      }
-    },
-    filterSubmit(key){
-      this.$emit('filter-option');
-      this.filter[key] = 0;
-    }
+    // sortBy(key) {
+    //   this.sortKey = key
+    //   this.sortOrders[key] = this.sortOrders[key] * -1
+    // },
+    // showFilter(key){
+    //   if(this.filter[key]){
+    //     this.filter[key] = 0;
+    //   }else{
+    //     Vue.set(this.filter,key,1);
+    //   }
+    // },
+    // filterSubmit(key){
+    //   this.$emit('filter-option');
+    //   this.filter[key] = 0;
+    // }
   }
 }
 </script>
@@ -444,6 +496,44 @@ export default {
     animation-delay:1.04s;
   }
 
+  .vue-table .sort-wrap {
+    position: absolute;
+    top: 0px;
+    width: 14px;
+    height: 100%;
+    display: inline-flex;
+    margin-left: 5px;
+    flex-direction: column;
+    align-items: center;
+  }
+  .vue-table .sort-wrap .sort-up,.vue-table .sort-wrap .sort-down{
+    display: block;
+    width: 14px;
+    height: 50%;
+    cursor: pointer;
+  }
+  .vue-table .sort-wrap .icon-sort-up,.vue-table .sort-wrap .icon-sort-down {
+    width: 0;
+    height: 0;
+    left: 2px;
+    position: absolute;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+  }  
+  .vue-table .sort-wrap .sort-up.on .icon-sort-up {
+    border-bottom-color: #409eff;
+  }
+  .vue-table .sort-wrap .sort-down.on .icon-sort-down {
+    border-top-color: #409eff;
+  }
+  .vue-table .sort-wrap .sort-up .icon-sort-up {
+    border-bottom: 6px solid #c0c4cc;
+    top: 14px;
+  }
+  .vue-table .sort-wrap .sort-down .icon-sort-down {
+    border-top: 6px solid #c0c4cc;
+    bottom: 14px;
+  }
   @-webkit-keyframes antSlideDownIn {
       0% {
           opacity: 0;
