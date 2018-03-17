@@ -1,14 +1,23 @@
 {
-  "name": "vue.dataGrid",
+  "name": "vue-easy-data-grid",
   "version": "0.0.1",
   "description": "A dataGrid for Vue.js",
   "main": "src/index.js",
-  "files": [],
+  "files": [
+    "dist/**",
+    "src/**",
+    "LICENSE",
+    "README.md",
+    "example/**"
+  ],
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --hot",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
-  "repository": {},
+  "repository": {
+    "type": "git", 
+    "url": "git+https://github.com/keluo/vue-easy-data-grid.git"
+  },
   "keywords": [
     "vue",
     "dataGrid",
