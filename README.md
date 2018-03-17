@@ -1,6 +1,11 @@
 # vue.dataGrid
 > dataGrid for Vue.js
 
+## install
+```javascript
+npm install vue-easy-data-grid
+```
+
 ## 初始化插件
 ```javascript
 import Vue from 'vue'
