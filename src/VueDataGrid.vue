@@ -20,7 +20,7 @@
           </label>
         </th>
         <th v-for="(item,key) in columns" >
-          <span v-text="typeof item == 'object' ? item.name : item"></span>
+          <span v-text="typeof item == 'object' ? item.name : item" class="head-name"></span>
           <div class="sort-wrap" v-if="typeof item == 'object' && item.sort">
             <span class="sort-up" :class="item.sort.type === 'up'?'on':''" @click="sort('up',key)">
               <i class="icon-sort-up"></i>
@@ -57,7 +57,9 @@
           </label>
         </td>
         <td v-for="(value,index) in data"  track-by="$index" v-text="value"></td>
-        <td v-if="hasOperation"></td>
+        <td v-if="hasOperation" class="options">
+          <slot :data="data" :index="index"></slot>
+        </td>
       </tr>
       <tr v-if="isKeyValue" v-for = "(data,index) in listData" :class="zebra && index % 2 == 1 ?  'zebra-line' : '' ">
         <td v-if="selection" style="min-width:0px;width: 45px;">
@@ -67,8 +69,10 @@
           </label>
         </td>
         <td v-for="(value,key) in columns">
-          <span v-if="typeof value == 'object'" v-html="formatter(value,listData[index],key)" v-on:click="click(value,listData[index],key)"></span>
+          <span v-if="typeof value == 'object' && !value.isSlot" v-html="formatter(value,listData[index],key)" v-on:click="click(value,listData[index],key)"></span>
           <span v-if="typeof value != 'object'" v-text="data[key]"></span>
+
+          <slot v-if="typeof value == 'object' && value.isSlot" :data="data" :index="index" :name="'slot-'+key"></slot>
         </td>
         <td v-if="hasOperation" class="options">
           <slot :data="data" :index="index"></slot>
@@ -315,6 +319,9 @@ export default {
     position: relative;
     color: #333;
     text-align: left;
+  }
+  .vue-table thead tr th .head-name{
+    float: left;
   }
   .vue-table thead tr th  .fa{
     cursor: pointer;

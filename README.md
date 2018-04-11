@@ -67,7 +67,7 @@ export default {
   }
 }
 ```
-#### 3、自定义列
+#### 3、自定义列（只可以格式化列和为列添加一个click）
 ##### HTML Template
 ```html
 <vue-data-grid 
@@ -105,7 +105,45 @@ export default {
   }
 }
 ```
-#### 4、多选
+#### 4、自定义列（增强版）
+##### HTML Template
+```html
+<vue-data-grid 
+  :list-data="listData"
+  :columns="columns"
+  :zebra="true"
+  :is-key-value="true">
+  <template slot-scope="props" slot="slot-age">
+    <a href="javascript:void(0);" v-text="props.data['age'] + '岁'"></a>
+    <a href="javascript:void(0);" @click="showAge(props.data['age'])">点我</a>
+  </template>
+</vue-data-grid>
+```
+##### javascript 
+```javascript
+export default {
+  name: 'App',
+  data () {
+    return {
+      listData:[{ id:1,name:'张三',age:'18'},{id:2,name:'李四',age:'18' }],
+      columns:{
+        id:'学号',
+        name:'姓名',
+        age:{
+          name:'年龄',
+          isSlot:true
+        }
+      },
+    }
+  }，
+  methods:{
+    showAge(age){
+      alert(age);
+    }
+  }
+}
+```
+#### 5、多选
 ##### HTML Template
 ```html
 <vue-data-grid 
@@ -135,7 +173,7 @@ export default {
   }
 }
 ``` 
-#### 5、显示加载中
+#### 6、显示加载中
 ##### HTML Template
 ```html
 <vue-data-grid 
@@ -175,7 +213,7 @@ export default {
   },
 }
 ```
-#### 6、排序
+#### 7、排序
 ##### HTML Template
 ```html
 <vue-data-grid 

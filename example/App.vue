@@ -30,7 +30,7 @@
   </div>
 
   <div class="block"  style="width: 80%;">
-    <span class="demonstration">自定义列</span>
+    <span class="demonstration">自定义列（只可以格式化列和为列添加一个click）</span>
     <vue-data-grid 
       :list-data="listData"
       :columns="columnsForEdit"
@@ -84,6 +84,19 @@
       :zebra="true"
       :is-key-value="true"
       >
+    </vue-data-grid>
+  </div>
+  <div class="block"  style="width: 80%;">
+    <span class="demonstration">自定义列（增强版）</span>
+    <vue-data-grid 
+      :list-data="listData"
+      :columns="columnsForSlot"
+      :zebra="true"
+      :is-key-value="true">
+      <template slot-scope="props" slot="slot-age">
+        <a href="javascript:void(0);" v-text="props.data['age'] + '岁'"></a>
+        <a href="javascript:void(0);" @click="showAge(props.data['age'])">点我</a>
+      </template>
     </vue-data-grid>
   </div>
   <div class="block"  style="width: 80%;">
@@ -179,6 +192,14 @@ export default {
           }
         }
       },
+      columnsForSlot:{
+        id:'学号',
+        name:'姓名',
+        age:{
+          name:'年龄',
+          isSlot:true
+        }
+      },
       isLoading:true
     }
   },
@@ -210,6 +231,9 @@ export default {
     deleteToData(data,index){
       this.moveNewData.splice(index,1);
 
+    },
+    showAge(age){
+      alert(age);
     }
   }
 }
