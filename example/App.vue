@@ -164,7 +164,9 @@ export default {
       columns:{
         id:'学号',
         name:'姓名',
-        age:'年龄'
+        age:{
+          name:'年龄'
+        }
       },
       columnsForEdit:{
         id:'学号',
@@ -181,14 +183,17 @@ export default {
       },
       columnsForSort:{
         id:'学号',
-        name:'姓名',
+        name:{
+          name:'姓名',
+          sort:true,
+        },
         age:{
           name:'年龄',
           sort:{
             type:'down',
-            // custom:function(type,key){
-            //   console.log(key,type);
-            // }
+            custom:function(type,key){
+              console.log(key,type);
+            }
           }
         }
       },

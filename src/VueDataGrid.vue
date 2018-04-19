@@ -190,6 +190,11 @@ export default {
   },
   methods: {
     sort(type,key){
+      //清空之前的排序
+      this.clearSort();
+      if(typeof this.columns[key].sort === 'boolean'){
+        this.columns[key].sort = {};
+      }
       if(typeof this.columns[key].sort.type === 'undefined'){
         this.$set(this.columns[key].sort, 'type', '');
       }
@@ -198,10 +203,19 @@ export default {
       }else if(type === 'down'){
         this.columns[key].sort.type = 'down';
       }
-      if(this.columns[key].sort.custom&& typeof this.columns[key].sort.custom == 'function'){
+      if(this.columns[key].sort.custom && typeof this.columns[key].sort.custom == 'function'){
         this.columns[key].sort.custom(type,key);
       }else{
         let x = this.listData.sort(this.sortBy(key,type === 'up'?true:false));
+      }
+    },
+    clearSort(){
+      for(let key in this.columns){
+        if(this.columns.hasOwnProperty(key)){
+          if(this.columns[key].sort && this.columns[key].sort.type){
+            this.columns[key].sort.type = '';
+          }
+        }
       }
     },
     sortBy: function(attr,rev){

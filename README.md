@@ -235,6 +235,7 @@ export default {
         name:'姓名',
         age:{
           name:'年龄',
+          //sort:true sort亦可直接传true
           sort:{
             /*
             非必需，数组初始化时的排序，
