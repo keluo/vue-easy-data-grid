@@ -3,8 +3,8 @@
   <table class="vue-table">
     <thead>
       <tr v-if="!isKeyValue">
-        <th v-if="selection && listData && listData.length > 0">
-          <label class="checkbox-wrap">'
+        <th v-if="selection && currentListData && currentListData.length > 0">
+          <label class="checkbox-wrap">
             <input type="checkbox" class="checkbox-input" id="selectionAll" v-model="selectionAllVal"/>
             <label class="checkbox-inner" for="selectionAll"></label>
           </label>
@@ -13,7 +13,7 @@
         <th v-if="hasOperation">操作</th>
       </tr>
       <tr v-if="isKeyValue">
-        <th v-if="selection && listData && listData.length > 0">
+        <th v-if="selection && currentListData && currentListData.length > 0">
           <label class="checkbox-wrap">
             <input type="checkbox" class="checkbox-input" id="selectionAll" v-model="selectionAllVal"/>
             <label class="checkbox-inner" for="selectionAll"></label>
@@ -22,34 +22,37 @@
         <th v-for="(item,key) in columns" >
           <span v-text="typeof item == 'object' ? item.name : item" class="head-name"></span>
           <div class="sort-wrap" v-if="typeof item == 'object' && item.sort">
-            <span class="sort-up" :class="item.sort.type === 'up'?'on':''" @click="sort('up',key)">
+            <span class="sort-up" :class="item.sort.type === 'up'?'on':''" @click="sort('up',key)" v-if="!item.sort.support || item.sort.support === 'up'">
               <i class="icon-sort-up"></i>
             </span>
-            <span class="sort-down" :class="item.sort.type === 'down'?'on':''" @click="sort('down',key)">
+            <span class="sort-down" :class="item.sort.type === 'down'?'on':''" @click="sort('down',key)" v-if="!item.sort.support || item.sort.support === 'down'">
               <i class="icon-sort-down"></i>
             </span>
           </div>
-          <!-- <i v-if="typeof item == 'object' && item.filter" class="fa fa-filter" @click="showFilter(key)" :class="(columns[key].filterValue && columns[key].filterValue.length > 0) ? 'current' : ''"></i>
-          <div class="filter-wrap" v-if="typeof item == 'object' && item.filter && item.filter.length > 0"  v-show="filter[key]">
-            <div class="filter-content">
-              <div class="filter-item" v-for="(value,index)  in item.filter">
-                <input :id="'fiterName'+index" class="css-checkbox" type="checkbox"  :value="value" v-model="columns[key].filterValue">
-                <input :id="'fiterName'+index" class="css-checkbox" type="checkbox"  :value="value" v-model="fiterName">
-                <label :for="'fiterName'+index" class="css-label" v-text="value"></label>
+          <div class="filter-wrap" v-if="typeof item == 'object' && item.filter" @click="showFilter(key)">
+            <i class="icon-filter" :class="(columns[key].filterValue && columns[key].filterValue.length > 0) ? 'current' : ''"></i>
+            <div class="filter-ext-wrap"  v-show="filter[key]">
+              <div class="filter-content">
+                <div class="filter-item" v-for="(value,index)  in item.filter">
+                  <label class="checkbox-wrap">
+                    <input type="checkbox" class="checkbox-input" :id="'filterName'+index" :value="index" v-model="columns[key].filterValue"/>
+                    <label class="checkbox-inner" :for="'filterName'+index"></label>
+                  </label>
+                  <span class="filter-item-txt" v-text="value"></span>
+                </div>
+              </div>
+              <div class="filter-options">
+                <a class="confirm" @click="filterSubmit(key)">确定</a>
+                <a class="reset">重置</a>
               </div>
             </div>
-            <div class="filter-options">
-              <a class="confirm" @click="filterSubmit(key)">确定</a>
-              <a class="reset">Reset</a>
-            </div>
           </div>
-          <slot name="filter" :data="item" :showFlg="filter" ></slot> -->
         </th>
         <th v-if="hasOperation">操作</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-if="!isKeyValue" v-for = "(data,index) in listData" :class="zebra && index % 2 == 1 ?  'zebra-line' : '' ">
+      <tr v-if="!isKeyValue" v-for = "(data,index) in currentListData" :class="zebra && index % 2 == 1 ?  'zebra-line' : '' ">
         <td v-if="selection" style="min-width:0px;width: 45px;">
           <label class="checkbox-wrap">
             <input :id="'selection_'+index" type="checkbox" class="checkbox-input" v-model="selectionVal[index]"/>
@@ -61,7 +64,7 @@
           <slot :data="data" :index="index"></slot>
         </td>
       </tr>
-      <tr v-if="isKeyValue" v-for = "(data,index) in listData" :class="zebra && index % 2 == 1 ?  'zebra-line' : '' ">
+      <tr v-if="isKeyValue" v-for = "(data,index) in currentListData" :class="zebra && index % 2 == 1 ?  'zebra-line' : '' ">
         <td v-if="selection" style="min-width:0px;width: 45px;">
           <label class="checkbox-wrap">
             <input :id="'selection_'+index" type="checkbox" class="checkbox-input" v-model="selectionVal[index]"/>
@@ -69,7 +72,7 @@
           </label>
         </td>
         <td v-for="(value,key) in columns">
-          <span v-if="typeof value == 'object' && !value.isSlot" v-html="formatter(value,listData[index],key)" v-on:click="click(value,listData[index],key)"></span>
+          <span v-if="typeof value == 'object' && !value.isSlot" v-html="formatter(value,currentListData[index],key)" v-on:click="click(value,currentListData[index],key)"></span>
           <span v-if="typeof value != 'object'" v-text="data[key]"></span>
 
           <slot v-if="typeof value == 'object' && value.isSlot" :data="data" :index="index" :name="'slot-'+key"></slot>
@@ -144,7 +147,7 @@ export default {
   },
   data () {
     return {
-      // filter:{},
+      filter:{},
       selectionVal:[]
     };
   },
@@ -161,6 +164,10 @@ export default {
     }
   },
   computed: {
+    currentListData : function(){
+      let that = this;
+      return JSON.parse(JSON.stringify(that.listData));
+    },
     selectionAllVal :{
       get(){
         var total = 0;
@@ -169,14 +176,14 @@ export default {
             total++;
           }
         }
-        return total === this.listData.length ? true : false;
+        return total === this.currentListData.length ? true : false;
       },
       set(){
         if(this.selectionAllVal){
           this.selectionVal = [];
         }else{
           this.selectionVal = [];
-          for(var i=0; i < this.listData.length ; i++){
+          for(var i=0; i < this.currentListData.length ; i++){
             this.selectionVal.push(true);
           }
         }
@@ -191,6 +198,10 @@ export default {
   methods: {
     sort(type,key){
       //清空之前的排序
+      let currentType = null;
+      if(typeof this.columns[key].sort == 'object' && typeof this.columns[key].sort.type === 'string') {
+        currentType = this.columns[key].sort.type;
+      }
       this.clearSort();
       if(typeof this.columns[key].sort === 'boolean'){
         this.columns[key].sort = {};
@@ -203,10 +214,20 @@ export default {
       }else if(type === 'down'){
         this.columns[key].sort.type = 'down';
       }
+      //判断是否为自定义
       if(this.columns[key].sort.custom && typeof this.columns[key].sort.custom == 'function'){
-        this.columns[key].sort.custom(type,key);
+        if(currentType === type){
+          this.columns[key].sort.type = '';
+        }
+        this.columns[key].sort.custom(type,key,currentType);
       }else{
-        let x = this.listData.sort(this.sortBy(key,type === 'up'?true:false));
+        //取消排序
+        if(currentType === type){
+          this.currentListData = JSON.parse(JSON.stringify(this.listData));
+          this.columns[key].sort.type = '';
+        }else{
+          this.currentListData.sort(this.sortBy(key,type === 'up'?true:false));
+        }
       }
     },
     clearSort(){
@@ -245,7 +266,7 @@ export default {
         this.selectionVal = [];
       }else{
         this.selectionVal = [];
-        for(var i=0; i < this.listData.length ; i++){
+        for(var i=0; i < this.currentListData.length ; i++){
           this.selectionVal.push(true);
         }
       }
@@ -264,21 +285,17 @@ export default {
         return data[key];
       }
     },
-    // sortBy(key) {
-    //   this.sortKey = key
-    //   this.sortOrders[key] = this.sortOrders[key] * -1
-    // },
-    // showFilter(key){
-    //   if(this.filter[key]){
-    //     this.filter[key] = 0;
-    //   }else{
-    //     Vue.set(this.filter,key,1);
-    //   }
-    // },
-    // filterSubmit(key){
-    //   this.$emit('filter-option');
-    //   this.filter[key] = 0;
-    // }
+    showFilter(key){
+      if(this.filter[key]){
+        this.filter[key] = 0;
+      }else{
+        this.$set(this.filter,key,1);
+      }
+    },
+    filterSubmit(key){
+      this.$emit('filter-option');
+      this.filter[key] = 0;
+    }
   }
 }
 </script>
@@ -365,24 +382,45 @@ export default {
   .vue-table tbody tr td.nowrap{
     white-space: nowrap;
   }
-
   .vue-table .filter-wrap{
     position: absolute;
+    top: 0px;
+    width: 14px;
+    height: 100%;
+    display: inline-flex;
+    margin-left: 5px;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+  }
+  .vue-table .filter-wrap .icon-filter {
+    width: 6px;
+    height: 6px;
+    display: inline-block;
+    border-top: 1px solid #999;
+    border-right: 1px solid #999;
+    transform: rotate(135deg);
+    position: absolute;
+    top: 50%;
+    margin-top: -4px;
+  }
+  .vue-table .filter-wrap .filter-ext-wrap{
+    position: absolute;
     min-width: 96px;
-    margin-left: -8px;
     background: #fff;
     border-radius: 4px;
     box-shadow: 0 1px 6px rgba(0,0,0,.2);
     z-index: 999;
     top: 30px;
-    left: 50px;
+    left: 0px;
+    cursor: initial;
   }
-  .vue-table .filter-wrap .filter-content {
+  .vue-table .filter-wrap .filter-ext-wrap .filter-content {
     max-width: 500px;
     max-height: 300px;
     overflow: auto;
   }
-  .vue-table .filter-wrap .filter-item {
+  .vue-table .filter-wrap .filter-ext-wrap .filter-item {
     padding: 8px 16px;
     margin: 0;
     clear: both;
@@ -390,27 +428,32 @@ export default {
     font-weight: 400;
     color: rgba(0,0,0,.65);
     white-space: nowrap;
-    cursor: pointer;
     -webkit-transition: all .3s;
     transition: all .3s;
+    line-height: 18px;
   }
-  .vue-table .filter-wrap .filter-options {
+  .vue-table .filter-wrap .filter-ext-wrap .filter-item .filter-item-txt{
+    margin-left: 5px;
+  }
+  .vue-table .filter-wrap .filter-ext-wrap .filter-options {
     overflow: hidden;
     padding: 7px 16px;
     border-top: 1px solid #e9e9e9;
+    font-size: 12px;
   }
-  .vue-table .filter-wrap .filter-options a{
+  .vue-table .filter-wrap .filter-ext-wrap .filter-options a{
     color: #108ee9;
     cursor: pointer;
   }
-  .vue-table .filter-wrap .filter-options a.confirm{
+  .vue-table .filter-wrap .filter-ext-wrap .filter-options a.confirm{
     float: right;
     color: #fff;
-    background-color: #108ee9;
-    padding: 5px 15px;
     border-radius: 2px;
+    color: #666;
+    margin-left: 10px;
   }
-  .vue-table .filter-wrap .filter-options a.reset{
+  .vue-table .filter-wrap .filter-ext-wrap .filter-options a.reset{
+    color: #999;
     float: right;
   }
 
@@ -526,18 +569,21 @@ export default {
     margin-left: 5px;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
   }
   .vue-table .sort-wrap .sort-up,.vue-table .sort-wrap .sort-down{
-    display: block;
     width: 14px;
-    height: 50%;
+    height: 26%;
     cursor: pointer;
+    position: relative;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
   }
   .vue-table .sort-wrap .icon-sort-up,.vue-table .sort-wrap .icon-sort-down {
     width: 0;
     height: 0;
-    left: 2px;
-    position: absolute;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
   }  
@@ -549,11 +595,9 @@ export default {
   }
   .vue-table .sort-wrap .sort-up .icon-sort-up {
     border-bottom: 6px solid #c0c4cc;
-    top: 14px;
   }
   .vue-table .sort-wrap .sort-down .icon-sort-down {
     border-top: 6px solid #c0c4cc;
-    bottom: 14px;
   }
   @-webkit-keyframes antSlideDownIn {
       0% {

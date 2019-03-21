@@ -100,6 +100,15 @@
     </vue-data-grid>
   </div>
   <div class="block"  style="width: 80%;">
+    <span class="demonstration">字段的过滤</span>
+    <vue-data-grid 
+      :list-data="listData"
+      :columns="columnsForFilter"
+      :zebra="true"
+      :is-key-value="true">
+    </vue-data-grid>
+  </div>
+  <div class="block"  style="width: 80%;">
     <span class="demonstration">显示加载中</span>
     <code>
       
@@ -182,7 +191,15 @@ export default {
         }
       },
       columnsForSort:{
-        id:'学号',
+        id:{
+          name:'学号',
+          sort:{
+            support:'down',
+            custom:function(type,key,currentType){
+              console.log(key,type,currentType);
+            }
+          }
+        },
         name:{
           name:'姓名',
           sort:true,
@@ -191,8 +208,8 @@ export default {
           name:'年龄',
           sort:{
             type:'down',
-            custom:function(type,key){
-              console.log(key,type);
+            custom:function(type,key,currentType){
+              console.log(key,type,currentType);
             }
           }
         }
@@ -203,6 +220,15 @@ export default {
         age:{
           name:'年龄',
           isSlot:true
+        }
+      },
+      columnsForFilter:{
+        id:'学号',
+        name:'姓名',
+        age:{
+          name:'年龄',
+          'filter':['18','20'],
+          'filterValue':[]
         }
       },
       isLoading:true
