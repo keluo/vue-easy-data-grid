@@ -19,7 +19,7 @@
             <label class="checkbox-inner" for="selectionAll"></label>
           </label>
         </th>
-        <th v-for="(item,key) in columns" >
+        <th v-for="(item,key) in columns" :style="item.style ? item.style : '' ">
           <span v-text="typeof item == 'object' ? item.name : item" class="head-name"></span>
           <div class="sort-wrap" v-if="typeof item == 'object' && item.sort">
             <span class="sort-up" :class="item.sort.type === 'up'?'on':''" @click="sort('up',key)" v-if="!item.sort.support || item.sort.support === 'up'">
@@ -293,7 +293,7 @@ export default {
       }
     },
     filterSubmit(key){
-      this.$emit('filter-option');
+      this.$emit('filter-option',key);
       this.filter[key] = 0;
     }
   }

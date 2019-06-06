@@ -105,6 +105,16 @@
       :list-data="listData"
       :columns="columnsForFilter"
       :zebra="true"
+      :is-key-value="true"
+      @filter-option="filterOption">
+    </vue-data-grid>
+  </div>
+  <div class="block"  style="width: 80%;">
+    <span class="demonstration">字段的style设置</span>
+    <vue-data-grid 
+      :list-data="listData"
+      :columns="columnsForStyle"
+      :zebra="true"
       :is-key-value="true">
     </vue-data-grid>
   </div>
@@ -231,6 +241,14 @@ export default {
           'filterValue':[]
         }
       },
+      columnsForStyle:{
+        id:'学号',
+        name:'姓名',
+        age:{
+          name:'年龄',
+          style:'width:800px;'
+        }
+      },
       isLoading:true
     }
   },
@@ -243,6 +261,10 @@ export default {
   watch: {
   },
   methods: {
+    filterOption:function(key){
+      console.log(key);
+      console.log(this.columnsForFilter.age.filterValue);
+    },
     deleteData(value){
       alert('删除'+value+'!');
     },
